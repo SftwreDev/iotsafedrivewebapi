@@ -15,5 +15,12 @@
       <jdbc-url>jdbc:postgresql://localhost:5432/iotsafedrive</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="iotsafedriveprod" uuid="626c3e95-9f36-4451-a249-0e8fd8a95f20">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://itosafedrive-do-user-15712432-0.c.db.ondigitalocean.com:25060/defaultdb</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>
