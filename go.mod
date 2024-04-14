@@ -1,6 +1,6 @@
 module iotsafedriveapi
 
-go 1.22.0
+go 1.21
 
 require (
 	github.com/cloudinary/cloudinary-go v1.7.0
