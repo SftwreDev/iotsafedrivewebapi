@@ -25,4 +25,4 @@ WORKDIR /root/
 COPY --from=builder /app/main .
 
 # Command to run the executable
-CMD ["./main"]
+CMD ["go", "run", "main.go"]
