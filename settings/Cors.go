@@ -14,6 +14,8 @@ func CorsSettings(router *mux.Router) http.Handler {
 			"http://127.0.0.1:8081",
 			"http://192.168.1.19:8081",
 			"https://*.ngrok-free.app",
+			"https://*.netlify.app",
+			"https://iotsafedrive.com",
 		},
 		AllowCredentials: true,
 		AllowedHeaders:   []string{"Authorization", "Content-Type"},         // Add "Authorization" to the list of allowed headers
