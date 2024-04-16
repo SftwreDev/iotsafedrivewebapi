@@ -1,11 +1,12 @@
 package settings
 
 import (
+	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 	"net/http"
 )
 
-func CorsSettings(mux *http.ServeMux) http.Handler {
+func CorsSettings(router *mux.Router) http.Handler {
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{
 			"http://localhost:5173",
@@ -18,10 +19,10 @@ func CorsSettings(mux *http.ServeMux) http.Handler {
 		AllowedHeaders:   []string{"Authorization", "Content-Type"},         // Add "Authorization" to the list of allowed headers
 		AllowedMethods:   []string{"GET", "PUT", "POST", "DELETE", "PATCH"}, // Adjust allowed methods as needed
 		// Enable Debugging for testing, consider disabling in production
-		Debug: true,
+		Debug: false,
 	})
 
 	// Insert the middleware
-	handler := c.Handler(mux)
+	handler := c.Handler(router)
 	return handler
 }

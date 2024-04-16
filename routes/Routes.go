@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"github.com/gorilla/mux"
 	"iotsafedriveapi/controllers/api"
 	"iotsafedriveapi/controllers/api/accident_alert"
 	"iotsafedriveapi/controllers/api/actor"
@@ -16,54 +17,55 @@ import (
 )
 
 func InitializeRouter() {
-	mux := http.NewServeMux()
+	router := mux.NewRouter()
 
-	mux.HandleFunc("POST /api/signup", auth.SignUpApi)
-	mux.HandleFunc("POST /api/signin", auth.SignInApi)
-	mux.HandleFunc("POST /api/reset-password", auth.ResetPasswordApi)
-	mux.HandleFunc("POST /api/token/obtain", auth.ObtainNewToken)
-	mux.Handle("GET /api/token/verify", middleware.ValidateToken(http.HandlerFunc(auth.VerifyTokenApi)))
-	mux.Handle("POST /api/update-password", middleware.ValidateToken(http.HandlerFunc(auth.UpdatePasswordApi)))
+	router.HandleFunc("/api/signup", auth.SignUpApi).Methods("POST")
+	router.HandleFunc("/api/signin", auth.SignInApi).Methods("POST")
+	router.HandleFunc("/api/reset-password", auth.ResetPasswordApi).Methods("POST")
+	router.HandleFunc("/api/token/obtain", auth.ObtainNewToken).Methods("POST")
+	router.Handle("/api/token/verify", middleware.ValidateToken(http.HandlerFunc(auth.VerifyTokenApi))).Methods("GET")
+	router.Handle("/api/update-password", middleware.ValidateToken(http.HandlerFunc(auth.UpdatePasswordApi))).Methods("POST")
 
 	// Use the ValidateToken middleware for protected routes
-	mux.Handle("GET /api/actors", middleware.ValidateToken(http.HandlerFunc(api.ActorGetListApi)))
-	mux.Handle("GET /api/actor/profile", middleware.ValidateToken(http.HandlerFunc(actor.GetActorProfileApi)))
-	mux.Handle("POST /api/actor/profile/update", middleware.ValidateToken(http.HandlerFunc(actor.UpdateActorProfileApi)))
+	router.Handle("/api/actors", middleware.ValidateToken(http.HandlerFunc(api.ActorGetListApi))).Methods("GET")
+	router.Handle("/api/actor/profile", middleware.ValidateToken(http.HandlerFunc(actor.GetActorProfileApi))).Methods("GET")
+	router.Handle("/api/actor/profile/update", middleware.ValidateToken(http.HandlerFunc(actor.UpdateActorProfileApi))).Methods("POST")
 
-	mux.Handle("GET /api/rescuers", middleware.ValidateToken(http.HandlerFunc(rescuers.ListOfRescuersApi)))
-	mux.Handle("POST /api/rescuers/select", middleware.ValidateToken(http.HandlerFunc(rescuers.SelectRescuerApi)))
-	mux.Handle("GET /api/rescuers/details", middleware.ValidateToken(http.HandlerFunc(rescuers.GetRescuerInformation)))
-	mux.Handle("POST /api/rescuers/add", middleware.ValidateToken(http.HandlerFunc(rescuers.AddNewRescuerApi)))
+	router.Handle("/api/rescuers", middleware.ValidateToken(http.HandlerFunc(rescuers.ListOfRescuersApi))).Methods("GET")
+	router.Handle("/api/rescuers/select", middleware.ValidateToken(http.HandlerFunc(rescuers.SelectRescuerApi))).Methods("POST")
+	router.Handle("/api/rescuers/details", middleware.ValidateToken(http.HandlerFunc(rescuers.GetRescuerInformation))).Methods("GET")
+	router.Handle("/api/rescuers/add", middleware.ValidateToken(http.HandlerFunc(rescuers.AddNewRescuerApi))).Methods("POST")
 
-	mux.Handle("GET /api/vehicle", middleware.ValidateToken(http.HandlerFunc(vehicle.GetUsersVehicleApi)))
-	mux.Handle("POST /api/vehicle/add", middleware.ValidateToken(http.HandlerFunc(vehicle.AddVehicleApi)))
-	mux.Handle("POST /api/vehicle/update", middleware.ValidateToken(http.HandlerFunc(vehicle.UpdateVehicleApi)))
-	mux.Handle("GET /api/vehicle/all", middleware.ValidateToken(http.HandlerFunc(vehicle.GetAllVehicleApi)))
+	router.Handle("/api/vehicle", middleware.ValidateToken(http.HandlerFunc(vehicle.GetUsersVehicleApi))).Methods("GET")
+	router.Handle("/api/vehicle/add", middleware.ValidateToken(http.HandlerFunc(vehicle.AddVehicleApi))).Methods("POST")
+	router.Handle("/api/vehicle/update", middleware.ValidateToken(http.HandlerFunc(vehicle.UpdateVehicleApi))).Methods("POST")
+	router.Handle("/api/vehicle/all", middleware.ValidateToken(http.HandlerFunc(vehicle.GetAllVehicleApi))).Methods("GET")
 
-	mux.Handle("GET /api/trusted-contacts", middleware.ValidateToken(http.HandlerFunc(trusted_contacts.ListTrustedContactsApi)))
-	mux.Handle("GET /api/trusted-contacts/all", middleware.ValidateToken(http.HandlerFunc(trusted_contacts.GetAllTrustedContactsApi)))
-	mux.Handle("POST /api/trusted-contacts/add", middleware.ValidateToken(http.HandlerFunc(trusted_contacts.AddTrustedContactsApi)))
-	mux.Handle("POST /api/trusted-contacts/update", middleware.ValidateToken(http.HandlerFunc(trusted_contacts.UpdateTrustedContactsApi)))
+	router.Handle("/api/trusted-contacts", middleware.ValidateToken(http.HandlerFunc(trusted_contacts.ListTrustedContactsApi))).Methods("GET")
+	router.Handle("/api/trusted-contacts/all", middleware.ValidateToken(http.HandlerFunc(trusted_contacts.GetAllTrustedContactsApi))).Methods("GET")
+	router.Handle("/api/trusted-contacts/add", middleware.ValidateToken(http.HandlerFunc(trusted_contacts.AddTrustedContactsApi))).Methods("POST")
+	router.Handle("/api/trusted-contacts/update", middleware.ValidateToken(http.HandlerFunc(trusted_contacts.UpdateTrustedContactsApi))).Methods("POST")
 
-	mux.Handle("GET /api/activity-history/all", middleware.ValidateToken(http.HandlerFunc(history.GetAllActivityHistoryApi)))
-	mux.Handle("GET /api/activity-history/pending", middleware.ValidateToken(http.HandlerFunc(history.GetPendingActivityHistoryApi)))
-	mux.Handle("DELETE /api/activity-history/close", middleware.ValidateToken(http.HandlerFunc(history.CloseActivityHistoryApi)))
-	mux.Handle("GET /api/activity-history", middleware.ValidateToken(http.HandlerFunc(history.GetDetailedActivityHistoryApi)))
-	mux.Handle("GET /api/activity-history/latest", middleware.ValidateToken(http.HandlerFunc(history.GetLatestActivityHistoryApi)))
+	router.Handle("/api/activity-history/all", middleware.ValidateToken(http.HandlerFunc(history.GetAllActivityHistoryApi))).Methods("GET")
+	router.Handle("/api/activity-history/pending", middleware.ValidateToken(http.HandlerFunc(history.GetPendingActivityHistoryApi))).Methods("GET")
+	router.Handle("/api/activity-history/close", middleware.ValidateToken(http.HandlerFunc(history.CloseActivityHistoryApi))).Methods("DELETE")
+	router.Handle("/api/activity-history", middleware.ValidateToken(http.HandlerFunc(history.GetDetailedActivityHistoryApi))).Methods("GET")
+	router.Handle("/api/activity-history/latest", middleware.ValidateToken(http.HandlerFunc(history.GetLatestActivityHistoryApi))).Methods("GET")
 
-	mux.Handle("GET /api/users/all", middleware.ValidateToken(http.HandlerFunc(actor.GetAllUsersApi)))
+	router.Handle("/api/users/all", middleware.ValidateToken(http.HandlerFunc(actor.GetAllUsersApi))).Methods("GET")
 
-	mux.Handle("GET /api/accident-alert", middleware.ValidateToken(http.HandlerFunc(accident_alert.GetAllAccidentAlertApi)))
+	router.Handle("/api/accident-alert", middleware.ValidateToken(http.HandlerFunc(accident_alert.GetAllAccidentAlertApi))).Methods("GET")
 
-	mux.Handle("POST /api/iot/alerts", http.HandlerFunc(accident_alert.AccidentDetectedApi))
-	mux.Handle("GET /api/iot/alerts/check", http.HandlerFunc(accident_alert.GetLatestAccidentAlertApi))
-	mux.Handle("POST /api/send-sms", middleware.ValidateToken(http.HandlerFunc(accident_alert.SendSMSApi)))
+	router.Handle("/api/iot/alerts", http.HandlerFunc(accident_alert.AccidentDetectedApi)).Methods("POST")
+	router.Handle("/api/iot/alerts/check", http.HandlerFunc(accident_alert.GetLatestAccidentAlertApi)).Methods("GET")
+	router.Handle("/api/send-sms", middleware.ValidateToken(http.HandlerFunc(accident_alert.SendSMSApi))).Methods("POST")
 
 	// Inserting CORS middleware settings
-	handler := settings.CorsSettings(mux)
+	handler := settings.CorsSettings(router)
 
 	err := http.ListenAndServe(":8080", handler)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 }
