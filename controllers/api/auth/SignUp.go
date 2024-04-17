@@ -55,19 +55,19 @@ func SignUpApi(w http.ResponseWriter, r *http.Request) {
 
 	// Create a new user object with form values
 	newUser := &models.AppsUser{
-		FirstName:      firstName,
-		LastName:       lastName,
-		Email:          email,
-		Address:        address,
-		Contact:        contact,
-		DeviceID:       deviceID,
-		DateJoined:     time.Now(),
-		ProfilePicture: secureURL,
-		Password:       hashedPassword,
-		IsActive: true,
-		IsStaff: true,
-		IsSuperuser: false,
-		IsOnboardingDone: true
+		FirstName:        firstName,
+		LastName:         lastName,
+		Email:            email,
+		Address:          address,
+		Contact:          contact,
+		DeviceID:         deviceID,
+		DateJoined:       time.Now(),
+		ProfilePicture:   secureURL,
+		Password:         hashedPassword,
+		IsActive:         true,
+		IsStaff:          true,
+		IsSuperuser:      false,
+		IsOnboardingDone: false,
 	}
 
 	// Save user data to the database
