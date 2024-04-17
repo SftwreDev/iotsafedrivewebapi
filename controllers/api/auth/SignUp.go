@@ -61,7 +61,7 @@ func SignUpApi(w http.ResponseWriter, r *http.Request) {
 		Address:        address,
 		Contact:        contact,
 		DeviceID:       deviceID,
-		DateJoined:     time.Now().UTC(),
+		DateJoined:     time.Now(),
 		ProfilePicture: secureURL,
 		Password:       hashedPassword,
 	}
