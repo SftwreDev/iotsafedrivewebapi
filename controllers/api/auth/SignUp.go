@@ -64,6 +64,10 @@ func SignUpApi(w http.ResponseWriter, r *http.Request) {
 		DateJoined:     time.Now(),
 		ProfilePicture: secureURL,
 		Password:       hashedPassword,
+		IsActive: true,
+		IsStaff: true,
+		IsSuperuser: false,
+		IsOnboardingDone: true
 	}
 
 	// Save user data to the database
