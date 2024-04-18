@@ -25,7 +25,7 @@ type IoTAlert struct {
 }
 
 type SendSMS struct {
-	Latitude     string `json:"latitude" validate:"required"`
-	Longitude    string `json:"longitude" validate:"required"`
 	IsFalseAlarm bool   `json:"is_false_alarm"`
+	Latitude     string `json:"latitude"`
+	Longitude    string `json:"longitude"`
 }

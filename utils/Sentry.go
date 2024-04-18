@@ -15,7 +15,7 @@ func InitializeSentry() {
 	sentryError := sentry.Init(sentry.ClientOptions{
 		Dsn: "https://e1b7fafa040d80ed75c87983369aeb7e@o4507105149190144.ingest.us.sentry.io/4507105174290432",
 
-		Debug: false,
+		Debug: true,
 		// Enable tracing
 		EnableTracing: true,
 		// Specify either a TracesSampleRate...
