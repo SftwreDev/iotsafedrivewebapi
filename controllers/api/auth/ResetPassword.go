@@ -2,6 +2,7 @@ package auth
 
 import (
 	"encoding/json"
+	"github.com/getsentry/sentry-go"
 	"github.com/go-playground/validator/v10"
 	"io"
 	"iotsafedriveapi/models"
@@ -23,6 +24,7 @@ func ResetPasswordApi(w http.ResponseWriter, r *http.Request) {
 	validate := validator.New()
 	err := validate.Struct(input)
 	if err != nil {
+		sentry.CaptureException(err)
 		// Return a validation error response
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
@@ -32,6 +34,7 @@ func ResetPasswordApi(w http.ResponseWriter, r *http.Request) {
 	var appsUser structs.Actor
 	err = models.DB.Raw("SELECT email FROM apps_user WHERE email = ?", input.Email).Scan(&appsUser).Error
 	if err != nil {
+		sentry.CaptureException(err)
 		// Return an error response if query fails
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
@@ -48,6 +51,7 @@ func ResetPasswordApi(w http.ResponseWriter, r *http.Request) {
 	// Hash the password securely
 	hashedPassword, err := utils.HashPassword(input.Password)
 	if err != nil {
+		sentry.CaptureException(err)
 		http.Error(w, "Failed to hash password", http.StatusInternalServerError)
 		return
 	}
@@ -59,6 +63,7 @@ func ResetPasswordApi(w http.ResponseWriter, r *http.Request) {
 	`, hashedPassword, input.Email).Error
 
 	if result != nil {
+		sentry.CaptureException(err)
 		// Return an error response
 		utils.SendErrorResponse(http.StatusBadRequest, result.Error(), w)
 		return

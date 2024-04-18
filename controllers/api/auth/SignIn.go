@@ -2,6 +2,7 @@ package auth
 
 import (
 	"encoding/json"
+	"github.com/getsentry/sentry-go"
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt"
 	"io"
@@ -30,6 +31,7 @@ func SignInApi(w http.ResponseWriter, r *http.Request) {
 	validate := validator.New()
 	err := validate.Struct(input)
 	if err != nil {
+		sentry.CaptureException(err)
 		// Return a validation error response
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
@@ -39,6 +41,7 @@ func SignInApi(w http.ResponseWriter, r *http.Request) {
 	var appsUser []structs.Actor
 	err = models.DB.Raw("SELECT * FROM apps_user WHERE email = ?", input.Email).Scan(&appsUser).Error
 	if err != nil {
+		sentry.CaptureException(err)
 		// Return an error response if query fails
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
@@ -76,6 +79,7 @@ func SignInApi(w http.ResponseWriter, r *http.Request) {
 			}
 			signedAccessToken, signedRefreshToken, err := utils.GenerateAccessAndRefreshTokens(userClaims)
 			if err != nil {
+				sentry.CaptureException(err)
 				// Return an error response if token generation fails
 				utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 				return

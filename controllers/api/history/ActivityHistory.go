@@ -1,6 +1,7 @@
 package history
 
 import (
+	"github.com/getsentry/sentry-go"
 	"iotsafedriveapi/models"
 	"iotsafedriveapi/structs"
 	"iotsafedriveapi/utils"
@@ -22,6 +23,7 @@ func GetAllActivityHistoryApi(w http.ResponseWriter, r *http.Request) {
 	).Scan(&history).Error
 
 	if err != nil {
+		sentry.CaptureException(err)
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
 	}
@@ -48,6 +50,7 @@ func GetPendingActivityHistoryApi(w http.ResponseWriter, r *http.Request) {
 	).Scan(&history).Error
 
 	if err != nil {
+		sentry.CaptureException(err)
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
 	}
@@ -76,6 +79,7 @@ func GetDetailedActivityHistoryApi(w http.ResponseWriter, r *http.Request) {
 			`, activityId).Scan(&history).Error
 
 	if err != nil {
+		sentry.CaptureException(err)
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
 	}
@@ -98,6 +102,7 @@ func CloseActivityHistoryApi(w http.ResponseWriter, r *http.Request) {
 			`, activityId).Error
 
 	if err != nil {
+		sentry.CaptureException(err)
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
 	}
@@ -124,6 +129,7 @@ func GetLatestActivityHistoryApi(w http.ResponseWriter, r *http.Request) {
 			`).Scan(&history).Error
 
 	if err != nil {
+		sentry.CaptureException(err)
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
 	}

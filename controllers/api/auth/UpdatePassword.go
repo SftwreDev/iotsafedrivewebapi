@@ -2,6 +2,7 @@ package auth
 
 import (
 	"encoding/json"
+	"github.com/getsentry/sentry-go"
 	"github.com/go-playground/validator/v10"
 	"io"
 	"iotsafedriveapi/models"
@@ -35,6 +36,7 @@ func UpdatePasswordApi(w http.ResponseWriter, r *http.Request) {
 	validate := validator.New()
 	err := validate.Struct(input)
 	if err != nil {
+		sentry.CaptureException(err)
 		// Return a validation error response
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
@@ -43,6 +45,7 @@ func UpdatePasswordApi(w http.ResponseWriter, r *http.Request) {
 	// Hash the password securely
 	hashedPassword, err := utils.HashPassword(input.Password)
 	if err != nil {
+		sentry.CaptureException(err)
 		http.Error(w, "Failed to hash password", http.StatusInternalServerError)
 		return
 	}
@@ -54,6 +57,7 @@ func UpdatePasswordApi(w http.ResponseWriter, r *http.Request) {
 	`, hashedPassword, userID).Error
 
 	if result != nil {
+		sentry.CaptureException(result)
 		// Return an error response
 		utils.SendErrorResponse(http.StatusBadRequest, result.Error(), w)
 		return

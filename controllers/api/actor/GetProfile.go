@@ -1,6 +1,7 @@
 package actor
 
 import (
+	"github.com/getsentry/sentry-go"
 	"iotsafedriveapi/models"
 	"iotsafedriveapi/structs"
 	"iotsafedriveapi/utils"
@@ -13,6 +14,7 @@ func GetActorProfileApi(w http.ResponseWriter, r *http.Request) {
 	userClaims, ok := utils.GetUserClaimsContext(r)
 	if !ok {
 		message := "User not found "
+
 		// Return a not found error response
 		utils.SendErrorResponse(http.StatusNotFound, message, w)
 		return
@@ -52,6 +54,7 @@ func GetActorProfileApi(w http.ResponseWriter, r *http.Request) {
 			u.email = ?`, userEmail).Scan(&appsUser).Error
 
 	if err != nil {
+		sentry.CaptureException(err)
 		// Return an error response if query fails
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
@@ -78,6 +81,7 @@ func GetActorProfileApi(w http.ResponseWriter, r *http.Request) {
 				owner_id = ?`, user.ID).Scan(&appsTrustedContacts).Error
 
 		if err != nil {
+			sentry.CaptureException(err)
 			// Return an error response if query fails
 			utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 			return

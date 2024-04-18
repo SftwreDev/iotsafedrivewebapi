@@ -2,6 +2,7 @@ package rescuers
 
 import (
 	"encoding/json"
+	"github.com/getsentry/sentry-go"
 	"github.com/go-playground/validator/v10"
 	"io"
 	"iotsafedriveapi/models"
@@ -23,6 +24,7 @@ func ListOfRescuersApi(w http.ResponseWriter, r *http.Request) {
 	`).Scan(&rescuers).Error
 
 	if err != nil {
+		sentry.CaptureException(err)
 		// Return an error response if query fails
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
@@ -53,6 +55,7 @@ func SelectRescuerApi(w http.ResponseWriter, r *http.Request) {
 	validate := validator.New()
 	err := validate.Struct(payload)
 	if err != nil {
+		sentry.CaptureException(err)
 		// Return a validation error response
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
@@ -69,6 +72,7 @@ func SelectRescuerApi(w http.ResponseWriter, r *http.Request) {
 	`, payload.ActivityHistoryID, payload.RescuerID, payload.RespondersName, payload.Notes).Error
 
 	if execQuery != nil {
+		sentry.CaptureException(execQuery)
 		// Return an error response
 		utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
 		return
@@ -81,6 +85,7 @@ func SelectRescuerApi(w http.ResponseWriter, r *http.Request) {
 	`, "in-progress", payload.ActivityHistoryID).Error
 
 	if updateActHistory != nil {
+		sentry.CaptureException(updateActHistory)
 		// Return an error response
 		utils.SendErrorResponse(http.StatusBadRequest, updateActHistory.Error(), w)
 		return
@@ -113,6 +118,7 @@ func GetRescuerInformation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
+		sentry.CaptureException(err)
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
 	}
@@ -134,6 +140,7 @@ func AddNewRescuerApi(w http.ResponseWriter, r *http.Request) {
 	validate := validator.New()
 	err := validate.Struct(payload)
 	if err != nil {
+		sentry.CaptureException(err)
 		// Return a validation error response
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
@@ -149,6 +156,7 @@ func AddNewRescuerApi(w http.ResponseWriter, r *http.Request) {
 	`, payload.Name, payload.Address, payload.Contact).Error
 
 	if execQuery != nil {
+		sentry.CaptureException(execQuery)
 		// Return an error response
 		utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
 		return

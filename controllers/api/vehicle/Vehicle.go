@@ -2,6 +2,7 @@ package vehicle
 
 import (
 	"encoding/json"
+	"github.com/getsentry/sentry-go"
 	"github.com/go-playground/validator/v10"
 	"io"
 	"iotsafedriveapi/models"
@@ -31,6 +32,7 @@ func AddVehicleApi(w http.ResponseWriter, r *http.Request) {
 	validate := validator.New()
 	err := validate.Struct(input)
 	if err != nil {
+		sentry.CaptureException(err)
 		// Return a validation error response
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
@@ -43,6 +45,7 @@ func AddVehicleApi(w http.ResponseWriter, r *http.Request) {
 		`, input.Brand, input.Model, input.YearModel, input.PlateNo, userID).Error
 
 	if result != nil {
+		sentry.CaptureException(result)
 		// Return an error response
 		utils.SendErrorResponse(http.StatusBadRequest, result.Error(), w)
 		return
@@ -76,6 +79,7 @@ func GetUsersVehicleApi(w http.ResponseWriter, r *http.Request) {
 	).Scan(&vehicle).Error
 
 	if err != nil {
+		sentry.CaptureException(err)
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
 	}
@@ -105,6 +109,7 @@ func UpdateVehicleApi(w http.ResponseWriter, r *http.Request) {
 	validate := validator.New()
 	err := validate.Struct(input)
 	if err != nil {
+		sentry.CaptureException(err)
 		// Return a validation error response
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
@@ -123,6 +128,7 @@ func UpdateVehicleApi(w http.ResponseWriter, r *http.Request) {
 		`, input.Brand, input.Model, input.YearModel, input.PlateNo, userID).Error
 
 	if result != nil {
+		sentry.CaptureException(err)
 		// Return an error response
 		utils.SendErrorResponse(http.StatusBadRequest, result.Error(), w)
 		return
@@ -149,6 +155,7 @@ func GetAllVehicleApi(w http.ResponseWriter, r *http.Request) {
 	).Scan(&vehicle).Error
 
 	if err != nil {
+		sentry.CaptureException(err)
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
 	}

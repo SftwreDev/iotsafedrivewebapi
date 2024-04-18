@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+	"github.com/getsentry/sentry-go"
 	"iotsafedriveapi/models"
 	"iotsafedriveapi/structs"
 	"iotsafedriveapi/utils"
@@ -27,6 +28,7 @@ func SignUpApi(w http.ResponseWriter, r *http.Request) {
 	// Hash the password securely
 	hashedPassword, err := utils.HashPassword(password)
 	if err != nil {
+		sentry.CaptureException(err)
 		http.Error(w, "Failed to hash password", http.StatusInternalServerError)
 		return
 	}
@@ -35,6 +37,7 @@ func SignUpApi(w http.ResponseWriter, r *http.Request) {
 	file, err := utils.UploadFileFromFormData("profile_picture", r)
 
 	if err != nil {
+		sentry.CaptureException(err)
 		// Log the error and return it to the caller
 		log.Printf("Failed to upload file to Cloudinary: %v", err)
 		// Return an error response
@@ -46,6 +49,7 @@ func SignUpApi(w http.ResponseWriter, r *http.Request) {
 	secureURL, publicID, err := utils.UploadPublicFileToCloudinary(file)
 
 	if err != nil {
+		sentry.CaptureException(err)
 		// Log the error and return it to the caller
 		log.Printf("Failed to upload file to Cloudinary: %v", err)
 		// Return an error response
@@ -73,7 +77,7 @@ func SignUpApi(w http.ResponseWriter, r *http.Request) {
 	// Save user data to the database
 	result := models.DB.Create(newUser)
 	if result.Error != nil {
-
+		sentry.CaptureException(result.Error)
 		// If there is an error, delete the uploaded profile picture from Cloudinary
 		deleteFile, _ := utils.DeleteFileFromCloudinary(publicID)
 		fmt.Println(deleteFile)

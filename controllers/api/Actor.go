@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/getsentry/sentry-go"
 	"iotsafedriveapi/models"
 	"iotsafedriveapi/structs"
 	"net/http"
@@ -22,6 +23,7 @@ func ActorGetListApi(w http.ResponseWriter, r *http.Request) {
 		Find(&appsUser).Error
 
 	if err != nil {
+		sentry.CaptureException(err)
 		resp := structs.Response{
 			StatusCode: http.StatusInternalServerError,
 			Message:    err.Error(),

@@ -1,6 +1,7 @@
 package actor
 
 import (
+	"github.com/getsentry/sentry-go"
 	"iotsafedriveapi/models"
 	"iotsafedriveapi/structs"
 	"iotsafedriveapi/utils"
@@ -26,6 +27,7 @@ func GetAllUsersApi(w http.ResponseWriter, r *http.Request) {
 	).Scan(&users).Error
 
 	if err != nil {
+		sentry.CaptureException(err)
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
 	}

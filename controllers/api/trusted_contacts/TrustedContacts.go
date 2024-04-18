@@ -2,6 +2,7 @@ package trusted_contacts
 
 import (
 	"encoding/json"
+	"github.com/getsentry/sentry-go"
 	"github.com/go-playground/validator/v10"
 	"io"
 	"iotsafedriveapi/models"
@@ -44,6 +45,7 @@ func AddTrustedContactsApi(w http.ResponseWriter, r *http.Request) {
 		`, contact.Name, contact.Address, contact.Contact, userID).Error
 
 		if result != nil {
+			sentry.CaptureException(result)
 			// Return an error response
 			utils.SendErrorResponse(http.StatusBadRequest, result.Error(), w)
 			return
@@ -57,6 +59,7 @@ func AddTrustedContactsApi(w http.ResponseWriter, r *http.Request) {
 	`, userID).Error
 
 	if result != nil {
+		sentry.CaptureException(result)
 		// Return an error response
 		utils.SendErrorResponse(http.StatusBadRequest, result.Error(), w)
 		return
@@ -91,6 +94,7 @@ func ListTrustedContactsApi(w http.ResponseWriter, r *http.Request) {
 			owner_id = ?`, userID).Scan(&trustedContacts).Error
 
 	if err != nil {
+		sentry.CaptureException(err)
 		// Return an error response if query fails
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
@@ -132,6 +136,7 @@ func UpdateTrustedContactsApi(w http.ResponseWriter, r *http.Request) {
 	for _, contact := range input {
 		err := validate.Struct(contact)
 		if err != nil {
+			sentry.CaptureException(err)
 			// Return a validation error response
 			utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 			return
@@ -148,6 +153,7 @@ func UpdateTrustedContactsApi(w http.ResponseWriter, r *http.Request) {
 		`, contact.Name, contact.Address, contact.Contact, userID)
 
 		if result.Error != nil {
+			sentry.CaptureException(result.Error)
 			// Return an error response
 			utils.SendErrorResponse(http.StatusBadRequest, result.Error.Error(), w)
 			return
@@ -175,6 +181,7 @@ func GetAllTrustedContactsApi(w http.ResponseWriter, r *http.Request) {
 	).Scan(&trustedContacts).Error
 
 	if err != nil {
+		sentry.CaptureException(err)
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
 	}

@@ -2,6 +2,7 @@ package actor
 
 import (
 	"fmt"
+	"github.com/getsentry/sentry-go"
 	"iotsafedriveapi/models"
 	"iotsafedriveapi/structs"
 	"iotsafedriveapi/utils"
@@ -41,6 +42,7 @@ func UpdateActorProfileApi(w http.ResponseWriter, r *http.Request) {
 	var secureURL, publicID string
 
 	if err != nil {
+		sentry.CaptureException(err)
 		// Log the error and return it to the caller
 		log.Printf("File not found: %v", err.Error())
 
@@ -49,6 +51,7 @@ func UpdateActorProfileApi(w http.ResponseWriter, r *http.Request) {
 		secureURL, publicID, err = utils.UploadPublicFileToCloudinary(file)
 
 		if err != nil {
+			sentry.CaptureException(err)
 			// Log the error and return it to the caller
 			log.Printf("Failed to upload file to Cloudinary: %v", err)
 			// Return an error response
@@ -73,6 +76,7 @@ func UpdateActorProfileApi(w http.ResponseWriter, r *http.Request) {
 
 	// Check if the operation was successful
 	if result.Error != nil {
+		sentry.CaptureException(result.Error)
 		// If there is an error, delete the uploaded profile picture from Cloudinary
 		deleteFile, _ := utils.DeleteFileFromCloudinary(publicID)
 		fmt.Println(deleteFile)
