@@ -114,17 +114,6 @@ func ListTrustedContactsApi(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateTrustedContactsApi(w http.ResponseWriter, r *http.Request) {
-	// Get userClaims data from request context
-	userClaims, ok := utils.GetUserClaimsContext(r)
-	if !ok {
-		message := "User not found "
-		// Return a not found error response
-		utils.SendErrorResponse(http.StatusNotFound, message, w)
-		return
-	}
-
-	// Declare userID from userClaims
-	userID := userClaims.ID
 
 	var input []structs.TrustedContacts
 	body, _ := io.ReadAll(r.Body)
@@ -142,23 +131,20 @@ func UpdateTrustedContactsApi(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = models.DB.Exec(`
-			DELETE FROM apps_trustedcontacts 
-			WHERE owner_id = ?`, userClaims.ID).Error
-
-		if err != nil {
-			sentry.CaptureException(err)
-		}
-
 		result := models.DB.Exec(`
-			INSERT INTO apps_trustedcontacts(name, address, contact,  owner_id) 
-			VALUES (?, ?, ?, ?)
-		`, contact.Name, contact.Address, contact.Contact, userID).Error
+			UPDATE apps_trustedcontacts
+			SET 
+			    name = ?,
+			    address = ?,
+			    contact = ?
+			WHERE
+				id = ?
+		`, contact.Name, contact.Address, contact.Contact, contact.ID)
 
-		if result != nil {
-			sentry.CaptureException(result)
+		if result.Error != nil {
+			sentry.CaptureException(result.Error)
 			// Return an error response
-			utils.SendErrorResponse(http.StatusBadRequest, result.Error(), w)
+			utils.SendErrorResponse(http.StatusBadRequest, result.Error.Error(), w)
 			return
 		}
 
