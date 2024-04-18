@@ -250,11 +250,8 @@ func SendSMSApi(w http.ResponseWriter, r *http.Request) {
 
 	isFalseAlarm := payload.IsFalseAlarm
 
-	var latitude string
-	var longitude string
-
-	latitude = payload.Lat
-	longitude = payload.Lng
+	latitude := payload.Lat
+	longitude := payload.Lng
 
 	timestamps := time.Now()
 	location := utils.GetLocation(latitude, longitude)
@@ -274,7 +271,7 @@ func SendSMSApi(w http.ResponseWriter, r *http.Request) {
 				 status_report
 			) 
 			VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-		`, timestamps, location, latitude, longitude, "False Alarm", userID, "", "closed").Error
+		`, timestamps, location, latitude, longitude, "False Alarm", userID, "None", "closed").Error
 
 		if execQuery != nil {
 			sentry.CaptureException(execQuery)
