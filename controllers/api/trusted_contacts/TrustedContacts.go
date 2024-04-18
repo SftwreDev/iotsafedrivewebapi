@@ -142,20 +142,23 @@ func UpdateTrustedContactsApi(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		result := models.DB.Exec(`
-			UPDATE apps_trustedcontacts
-			SET 
-			    name = ?,
-			    address = ?,
-			    contact = ?
-			WHERE
-				owner_id = ?
-		`, contact.Name, contact.Address, contact.Contact, userID)
+		err = models.DB.Exec(`
+			DELETE FROM apps_trustedcontacts 
+			WHERE owner_id = ?`, userClaims.ID).Error
 
-		if result.Error != nil {
-			sentry.CaptureException(result.Error)
+		if err != nil {
+			sentry.CaptureException(err)
+		}
+
+		result := models.DB.Exec(`
+			INSERT INTO apps_trustedcontacts(name, address, contact,  owner_id) 
+			VALUES (?, ?, ?, ?)
+		`, contact.Name, contact.Address, contact.Contact, userID).Error
+
+		if result != nil {
+			sentry.CaptureException(result)
 			// Return an error response
-			utils.SendErrorResponse(http.StatusBadRequest, result.Error.Error(), w)
+			utils.SendErrorResponse(http.StatusBadRequest, result.Error(), w)
 			return
 		}
 
