@@ -253,13 +253,8 @@ func SendSMSApi(w http.ResponseWriter, r *http.Request) {
 	var latitude string
 	var longitude string
 
-	if alert.Latitude == "" || alert.Longitude == "" {
-		latitude = payload.Latitude
-		longitude = payload.Longitude
-	} else {
-		latitude = alert.Latitude
-		longitude = alert.Longitude
-	}
+	latitude = payload.Lat
+	longitude = payload.Lng
 
 	timestamps := time.Now()
 	location := utils.GetLocation(latitude, longitude)

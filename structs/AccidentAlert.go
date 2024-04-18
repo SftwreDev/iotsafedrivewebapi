@@ -26,6 +26,6 @@ type IoTAlert struct {
 
 type SendSMS struct {
 	IsFalseAlarm bool   `json:"is_false_alarm"`
-	Latitude     string `json:"latitude"`
-	Longitude    string `json:"longitude"`
+	Lat          string `json:"lat"`
+	Lng          string `json:"lng"`
 }
