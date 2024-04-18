@@ -100,6 +100,31 @@ func AccidentDetectedApi(w http.ResponseWriter, r *http.Request) {
 
 func GetLatestAccidentAlertApi(w http.ResponseWriter, r *http.Request) {
 
+	// Set the Content-Type header to JSON
+	w.Header().Set("Content-Type", "application/json")
+
+	// Get userClaims data from request context
+	userClaims, ok := utils.GetUserClaimsContext(r)
+	if !ok {
+		message := "User not found "
+		// Return a not found error response
+		utils.SendErrorResponse(http.StatusNotFound, message, w)
+		return
+	}
+
+	var deviceID string
+
+	execQuery := models.DB.Raw(`
+		SELECT device_id from apps_user
+		WHERE id = ?
+	`, userClaims.ID).Scan(&deviceID).Error
+
+	if execQuery != nil {
+		sentry.CaptureException(execQuery)
+		utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
+		return
+	}
+
 	var alert []structs.IoTAlert
 
 	err := models.DB.Raw(
@@ -107,8 +132,9 @@ func GetLatestAccidentAlertApi(w http.ResponseWriter, r *http.Request) {
 				SELECT
 					latitude, longitude, is_active, device_id
 				FROM apps_accidentalert
+				WHERE device_id = ?
 				LIMIT 1
-			`).Scan(&alert).Error
+			`, deviceID).Scan(&alert).Error
 
 	if err != nil {
 		sentry.CaptureException(err)

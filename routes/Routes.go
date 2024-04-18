@@ -57,7 +57,7 @@ func InitializeRouter() {
 	router.Handle("/api/accident-alert", middleware.ValidateToken(http.HandlerFunc(accident_alert.GetAllAccidentAlertApi))).Methods("GET")
 
 	router.Handle("/api/iot/alerts", http.HandlerFunc(accident_alert.AccidentDetectedApi)).Methods("POST")
-	router.Handle("/api/iot/alerts/check", http.HandlerFunc(accident_alert.GetLatestAccidentAlertApi)).Methods("GET")
+	router.Handle("/api/iot/alerts/check", middleware.ValidateToken(http.HandlerFunc(accident_alert.GetLatestAccidentAlertApi))).Methods("GET")
 	router.Handle("/api/send-sms", middleware.ValidateToken(http.HandlerFunc(accident_alert.SendSMSApi))).Methods("POST")
 
 	// Inserting CORS middleware settings
