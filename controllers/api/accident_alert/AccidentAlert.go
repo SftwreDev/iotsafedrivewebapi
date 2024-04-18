@@ -28,6 +28,7 @@ func GetAllAccidentAlertApi(w http.ResponseWriter, r *http.Request) {
 	).Scan(&accidentAlert).Error
 
 	if err != nil {
+		sentry.CaptureException(err)
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
 	}
@@ -110,6 +111,7 @@ func GetLatestAccidentAlertApi(w http.ResponseWriter, r *http.Request) {
 			`).Scan(&alert).Error
 
 	if err != nil {
+		sentry.CaptureException(err)
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
 	}
@@ -150,6 +152,7 @@ func SendSMSApi(w http.ResponseWriter, r *http.Request) {
 	validate := validator.New()
 	err := validate.Struct(payload)
 	if err != nil {
+		sentry.CaptureException(err)
 		// Return a validation error response
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
@@ -162,6 +165,7 @@ func SendSMSApi(w http.ResponseWriter, r *http.Request) {
 	`, userEmail).Scan(&userDeviceID).Error
 
 	if execQuery != nil {
+		sentry.CaptureException(execQuery)
 		utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
 		return
 	}
@@ -178,6 +182,7 @@ func SendSMSApi(w http.ResponseWriter, r *http.Request) {
 			`, userDeviceID).Scan(&alert).Error
 
 	if execQuery != nil {
+		sentry.CaptureException(execQuery)
 		utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
 		return
 	}
@@ -224,6 +229,7 @@ func SendSMSApi(w http.ResponseWriter, r *http.Request) {
 		`, timestamps, location, latitude, longitude, "False Alarm", userID, "", "closed").Error
 
 		if execQuery != nil {
+			sentry.CaptureException(execQuery)
 			utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
 			return
 		}
@@ -234,6 +240,7 @@ func SendSMSApi(w http.ResponseWriter, r *http.Request) {
 		`, userDeviceID).Error
 
 		if execQuery != nil {
+			sentry.CaptureException(execQuery)
 			utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
 			return
 		}
@@ -266,6 +273,7 @@ func SendSMSApi(w http.ResponseWriter, r *http.Request) {
 		`, timestamps, location, latitude, longitude, status, userID, message, "closed").Error
 
 		if execQuery != nil {
+			sentry.CaptureException(execQuery)
 			utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
 			return
 		}
@@ -276,6 +284,7 @@ func SendSMSApi(w http.ResponseWriter, r *http.Request) {
 		`, userDeviceID).Error
 
 		if execQuery != nil {
+			sentry.CaptureException(execQuery)
 			utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
 			return
 		}
