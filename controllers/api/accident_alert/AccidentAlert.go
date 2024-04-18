@@ -3,6 +3,7 @@ package accident_alert
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/getsentry/sentry-go"
 	"github.com/go-playground/validator/v10"
 	"io"
 	"iotsafedriveapi/models"
@@ -68,6 +69,7 @@ func AccidentDetectedApi(w http.ResponseWriter, r *http.Request) {
 	validate := validator.New()
 	err := validate.Struct(payload)
 	if err != nil {
+		sentry.CaptureException(err)
 		// Return a validation error response
 		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
@@ -84,6 +86,7 @@ func AccidentDetectedApi(w http.ResponseWriter, r *http.Request) {
 	`, payload.Latitude, payload.Longitude, payload.DeviceID, true).Error
 
 	if execQuery != nil {
+		sentry.CaptureException(execQuery)
 		// Return an error response
 		utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
 		return
