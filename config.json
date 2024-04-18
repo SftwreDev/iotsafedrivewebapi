@@ -1,13 +1,54 @@
-{
-  "first_name": "Admin",
-  "last_name": "Account",
-  "email": "superadmin@admin.com",
-  "password": "password...",
-  "is_superuser": "true",
-  "is_staff": "false",
-  "is_active": "true",
-  "is_onboarding_done": "true",
-  "device_id": "-",
-  "date_joined": "2024-01-01",
-  "profile_picture": "-"
-}
+[
+  {
+    "first_name": "Admin",
+    "last_name": "Account",
+    "email": "superadmin@admin.com",
+    "password": "password...",
+    "is_superuser": "true",
+    "is_staff": "false",
+    "is_active": "true",
+    "is_onboarding_done": "true",
+    "device_id": "-",
+    "date_joined": "2024-01-01",
+    "profile_picture": "-"
+  },
+  {
+    "first_name": "BFP Admin",
+    "last_name": "Account",
+    "email": "bfpadmin@admin.com",
+    "password": "password...",
+    "is_superuser": "true",
+    "is_staff": "false",
+    "is_active": "true",
+    "is_onboarding_done": "true",
+    "device_id": "-",
+    "date_joined": "2024-01-01",
+    "profile_picture": "-"
+  },
+  {
+    "first_name": "LDRRMO Admin",
+    "last_name": "Account",
+    "email": "ldrrmoadmin@admin.com",
+    "password": "password...",
+    "is_superuser": "true",
+    "is_staff": "false",
+    "is_active": "true",
+    "is_onboarding_done": "true",
+    "device_id": "-",
+    "date_joined": "2024-01-01",
+    "profile_picture": "-"
+  },
+  {
+    "first_name": "REDCROSS Admin",
+    "last_name": "Account",
+    "email": "redcrossadmin@admin.com",
+    "password": "password...",
+    "is_superuser": "true",
+    "is_staff": "false",
+    "is_active": "true",
+    "is_onboarding_done": "true",
+    "device_id": "-",
+    "date_joined": "2024-01-01",
+    "profile_picture": "-"
+  }
+]

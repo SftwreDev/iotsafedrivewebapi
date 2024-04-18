@@ -247,9 +247,17 @@ func SendSMSApi(w http.ResponseWriter, r *http.Request) {
 	userID := userClaims.ID
 
 	if isFalseAlarm {
+
 		execQuery = models.DB.Exec(`
 			INSERT INTO apps_activityhistory(
-			                                 timestamps, location, latitude, longitude, status, user_id, message, status_report
+		 		 timestamps, 
+				 location, 
+				 latitude, 
+				 longitude, 
+				 status, 
+				 user_id, 
+				 message, 
+				 status_report
 			) 
 			VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 		`, timestamps, location, latitude, longitude, "False Alarm", userID, "", "closed").Error
@@ -272,8 +280,8 @@ func SendSMSApi(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		message := fmt.Sprintf(
-			`URGENT: Accident! This is %s %s. I'm in an accident', need ambulance. Pls send help ASAP!`,
-			userClaims.FirstName, userClaims.LastName)
+			`URGENT: Accident! This is %s %s. I'm in an accident', need ambulance. Pls send help ASAP! Location: %s`,
+			userClaims.FirstName, userClaims.LastName, location)
 
 		var status string
 		for _, contact := range trustedContacts {
@@ -293,10 +301,17 @@ func SendSMSApi(w http.ResponseWriter, r *http.Request) {
 		}
 		execQuery = models.DB.Exec(`
 			INSERT INTO apps_activityhistory(
-			                                 timestamps, location, latitude, longitude, status, user_id, message, status_report
+				 timestamps, 
+				 location, 
+				 latitude, 
+				 longitude, 
+				 status, 
+				 user_id, 
+				 message, 
+				 status_report
 			) 
 			VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-		`, timestamps, location, latitude, longitude, status, userID, message, "closed").Error
+		`, timestamps, location, latitude, longitude, status, userID, message, "pending").Error
 
 		if execQuery != nil {
 			sentry.CaptureException(execQuery)

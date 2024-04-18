@@ -3,10 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"github.com/joho/godotenv"
+	"io"
 	"iotsafedriveapi/models"
 	"iotsafedriveapi/utils"
 	"os"
+	"time"
 )
 
 type SuperUser struct {
@@ -39,21 +41,22 @@ func createSuperUser() {
 	defer jsonFile.Close()
 
 	fmt.Println("Reading json file")
-	byteValue, _ := ioutil.ReadAll(jsonFile)
+	byteValue, _ := io.ReadAll(jsonFile)
 
-	var input SuperUser
+	var input []SuperUser
 	json.Unmarshal([]byte(byteValue), &input)
 
-	// Hash the password securely
-	hashedPassword, err := utils.HashPassword(input.Password)
-	if err != nil {
-		fmt.Printf("Error hashing password : %s", err.Error())
-	}
+	for _, superuser := range input {
+		// Hash the password securely
+		hashedPassword, err := utils.HashPassword(superuser.Password)
+		if err != nil {
+			fmt.Printf("Error hashing password : %s", err.Error())
+		}
 
-	fmt.Printf("Checking if superuser account exists: %s \n", input.Email)
-	var actor []models.AppsUser
+		fmt.Printf("Checking if superuser account exists: %s \n", superuser.Email)
+		var actor []models.AppsUser
 
-	result := models.DB.Raw(`
+		result := models.DB.Raw(`
 		SELECT 
 		    first_name, 
 		  	last_name, 
@@ -62,15 +65,15 @@ func createSuperUser() {
 		    apps_user
 		WHERE
 		    email = ?
-	`, input.Email).Scan(&actor).Error
+	`, superuser.Email).Scan(&actor).Error
 
-	if len(actor) != 0 {
-		fmt.Printf("Superuser account already exists: %s \nExiting now... \n", input.Email)
-	} else {
+		if len(actor) != 0 {
+			fmt.Printf("Superuser account already exists: %s \nExiting now... \n", superuser.Email)
+		} else {
 
-		fmt.Println("Creating superuser account now")
+			fmt.Println("Creating superuser account now")
 
-		result = models.DB.Exec(`
+			result = models.DB.Exec(`
 			INSERT INTO 
 				apps_user(
 						  first_name, 
@@ -86,29 +89,31 @@ func createSuperUser() {
 						  profile_picture)
 			VALUES 
 				(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-			`, input.FirstName, input.LastName, input.Email, hashedPassword, "true", "false",
-			"true", input.DeviceID, "true", input.DateJoined, input.ProfilePicture).Error
+			`, superuser.FirstName, superuser.LastName, superuser.Email, hashedPassword, "true", "false",
+				"true", superuser.DeviceID, "true", time.Now(), superuser.ProfilePicture).Error
 
-		if result != nil {
-			fmt.Printf("Error creating account : %s \n", result)
-		} else {
-			fmt.Println("Done creating superuser account")
+			if result != nil {
+				fmt.Printf("Error creating account : %s \n", result)
+			} else {
+				fmt.Println("Done creating superuser account")
+			}
 		}
 	}
+
 }
 
-//func main() {
-//
-//	fmt.Println("Server initializing...")
-//
-//	// Initialize env
-//	err := godotenv.Load(".env")
-//	if err != nil {
-//		return
-//	}
-//
-//	// Initialize models
-//	models.ConnectDatabase()
-//
-//	createSuperUser()
-//}
+func init() {
+
+	fmt.Println("Server initializing...")
+
+	// Initialize env
+	err := godotenv.Load(".env")
+	if err != nil {
+		return
+	}
+
+	// Initialize models
+	models.ConnectDatabase()
+
+	createSuperUser()
+}
