@@ -76,7 +76,26 @@ func AccidentDetectedApi(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	execQuery := models.DB.Exec(`
+	var deviceID string
+	execQuery := models.DB.Raw(`SELECT device_id FROM apps_accidentalert WHERE device_id = ?`, payload.DeviceID).Scan(&deviceID).Error
+
+	if execQuery != nil {
+		sentry.CaptureException(execQuery)
+		// Return an error response
+		utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
+		return
+	}
+
+	if deviceID != "" {
+		execQuery = models.DB.Exec(`DELETE FROM apps_accidentalert WHERE device_id = ?`, payload.DeviceID).Error
+		if execQuery != nil {
+			sentry.CaptureException(execQuery)
+			// Return an error response
+			utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
+			return
+		}
+	}
+	execQuery = models.DB.Exec(`
 		INSERT INTO apps_accidentalert(
 			latitude, 
 			longitude, 
