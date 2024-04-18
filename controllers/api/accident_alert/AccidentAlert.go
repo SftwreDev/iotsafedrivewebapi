@@ -189,9 +189,11 @@ func SendSMSApi(w http.ResponseWriter, r *http.Request) {
 	userEmail := userClaims.Email
 
 	// Read and parse request body into SignInInput struct
-	var payload structs.SendSMS
+	var payload structs.SendSMSStructs
 	body, _ := io.ReadAll(r.Body)
 	_ = json.Unmarshal(body, &payload)
+
+	fmt.Println(payload)
 
 	// Validate input using validator package
 	validate := validator.New()
