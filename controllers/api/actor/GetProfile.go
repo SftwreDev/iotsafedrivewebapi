@@ -24,7 +24,7 @@ func GetActorProfileApi(w http.ResponseWriter, r *http.Request) {
 	userEmail := userClaims.Email
 
 	// Query database for user with provided email
-	var appsUser []structs.AppsUser
+	var appsUser structs.AppsUser
 	err := models.DB.Raw(`
 		SELECT 
 			u.id,
@@ -60,67 +60,56 @@ func GetActorProfileApi(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check if user with provided email exists
-	if len(appsUser) == 0 {
-		message := "User not found for the given email"
-		// Return a not found error response
-		utils.SendErrorResponse(http.StatusNotFound, message, w)
-		return
-	}
+	var trustedContacts []any
 
-	for _, user := range appsUser {
+	var appsTrustedContacts []structs.AppsTrustedContacts
 
-		var appsTrustedContacts []structs.AppsTrustedContacts
-
-		err := models.DB.Raw(`
+	err = models.DB.Raw(`
 			SELECT 
 				id, name, contact, address
 			FROM 
 				apps_trustedcontacts
 			WHERE 
-				owner_id = ?`, user.ID).Scan(&appsTrustedContacts).Error
+				owner_id = ?`, appsUser.ID).Scan(&appsTrustedContacts).Error
 
-		if err != nil {
-			sentry.CaptureException(err)
-			// Return an error response if query fails
-			utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
-			return
-		}
-
-		var trustedContacts []any
-
-		for _, contact := range appsTrustedContacts {
-			trustedContacts = append(trustedContacts, structs.AppsTrustedContacts{
-				Name:    contact.Name,
-				Address: contact.Address,
-				Contact: contact.Contact,
-			})
-		}
-
-		// Prepare response with user information and associated vehicles
-		response := structs.AppsUser{
-			ID:               user.ID,
-			FirstName:        user.FirstName,
-			LastName:         user.LastName,
-			Address:          user.Address,
-			Contact:          user.Contact,
-			Email:            user.Email,
-			DeviceID:         user.DeviceID,
-			ProfilePicture:   user.ProfilePicture,
-			DateJoined:       user.DateJoined,
-			IsActive:         user.IsActive,
-			IsOnboardingDone: user.IsOnboardingDone,
-			IsStaff:          user.IsStaff,
-			IsSuperuser:      user.IsSuperuser,
-			Brand:            user.Brand,
-			Model:            user.Model,
-			YearModel:        user.YearModel,
-			PlateNo:          user.PlateNo, // Assign the vehicles to the response
-			TrustedContacts:  trustedContacts,
-		}
-
-		// Send success response
-		utils.SendSuccessResponse(http.StatusOK, "User's profile information", response, w)
+	if err != nil {
+		sentry.CaptureException(err)
+		// Return an error response if query fails
+		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
+		return
 	}
+
+	for _, contact := range appsTrustedContacts {
+		trustedContacts = append(trustedContacts, structs.AppsTrustedContacts{
+			Name:    contact.Name,
+			Address: contact.Address,
+			Contact: contact.Contact,
+		})
+	}
+
+	// Prepare response with user information and associated vehicles
+	response := structs.AppsUser{
+		ID:               appsUser.ID,
+		FirstName:        appsUser.FirstName,
+		LastName:         appsUser.LastName,
+		Address:          appsUser.Address,
+		Contact:          appsUser.Contact,
+		Email:            appsUser.Email,
+		DeviceID:         appsUser.DeviceID,
+		ProfilePicture:   appsUser.ProfilePicture,
+		DateJoined:       appsUser.DateJoined,
+		IsActive:         appsUser.IsActive,
+		IsOnboardingDone: appsUser.IsOnboardingDone,
+		IsStaff:          appsUser.IsStaff,
+		IsSuperuser:      appsUser.IsSuperuser,
+		Brand:            appsUser.Brand,
+		Model:            appsUser.Model,
+		YearModel:        appsUser.YearModel,
+		PlateNo:          appsUser.PlateNo, // Assign the vehicles to the response
+		TrustedContacts:  trustedContacts,
+	}
+
+	// Send success response
+	utils.SendSuccessResponse(http.StatusOK, "User's profile information", response, w)
 
 }
