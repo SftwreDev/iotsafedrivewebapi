@@ -19,9 +19,9 @@ type AccidentAlertOutput struct {
 }
 
 type IoTAlert struct {
-	DeviceID  string `json:"device_id"`
-	Latitude  string `json:"latitude"`
-	Longitude string `json:"longitude"`
+	DeviceID  string `json:"device_id" validate:"required"`
+	Latitude  string `json:"latitude" validate:"required"`
+	Longitude string `json:"longitude" validate:"required"`
 }
 
 type SendSMS struct {
