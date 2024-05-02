@@ -7,7 +7,6 @@ import (
 	"io"
 	"iotsafedriveapi/structs"
 	"iotsafedriveapi/utils"
-	"log"
 	"net/http"
 )
 
@@ -30,15 +29,11 @@ func ObtainNewToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	refreshClaims := utils.ParseRefreshToken(input.RefreshToken)
+	refreshClaims, err := utils.ParseRefreshToken(input.RefreshToken)
 
-	if refreshClaims.Valid() != nil {
-		input.RefreshToken, err = utils.NewRefreshToken(*refreshClaims)
-		if err != nil {
-			log.Fatal("error creating refresh token")
-		}
+	if err != nil {
+		fmt.Println(err.Error())
 	}
 
-	fmt.Println(input.RefreshToken)
-
+	fmt.Println(refreshClaims.Id)
 }

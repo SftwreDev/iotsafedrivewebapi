@@ -5,7 +5,6 @@ import (
 	"github.com/joho/godotenv"
 	"iotsafedriveapi/models"
 	"iotsafedriveapi/routes"
-	"iotsafedriveapi/utils"
 )
 
 func main() {
@@ -14,12 +13,13 @@ func main() {
 	// Initialize env
 	err := godotenv.Load(".env")
 	if err != nil {
+		fmt.Println(err.Error())
 		return
 	}
 
 	// Initialize Sentry config
 
-	utils.InitializeSentry()
+	//utils.InitializeSentry()
 
 	// Initialize models
 	models.ConnectDatabase()

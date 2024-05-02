@@ -348,3 +348,122 @@ func SendSMSApi(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func ForwardAccidentApi(w http.ResponseWriter, r *http.Request) {
+	// Set the Content-Type header to JSON
+	w.Header().Set("Content-Type", "application/json")
+
+	// Read and parse request body into SignInInput struct
+	var payload structs.ForwardAccident
+	body, _ := io.ReadAll(r.Body)
+	_ = json.Unmarshal(body, &payload)
+
+	// Validate input using validator package
+	validate := validator.New()
+	err := validate.Struct(payload)
+	if err != nil {
+		sentry.CaptureException(err)
+		// Return a validation error response
+		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
+		return
+	}
+
+	execQuery := models.DB.Exec(`
+	INSERT INTO apps_forwarded_accidents(rescuer_id, notes, status, forwarded_by, activity_history_id)
+	VALUES(?, ?, ?, ?, ?)
+	`, payload.RescuerID, payload.Notes, payload.Status, payload.ForwardedBy, payload.ActivityHistoryID).Error
+
+	if execQuery != nil {
+		sentry.CaptureException(execQuery)
+		utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
+		return
+	}
+
+	execQuery = models.DB.Exec(`
+		UPDATE apps_activityhistory 
+		SET status_report = 'forwarded'
+		WHERE id = ?
+	`, payload.ActivityHistoryID).Error
+
+	if execQuery != nil {
+		sentry.CaptureException(execQuery)
+		utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
+		return
+	}
+
+	var response []interface{}
+	utils.SendSuccessResponse(http.StatusOK, "Successfully forwarded accident", response, w)
+	return
+}
+
+func CheckIfAccidentIsForwarded(w http.ResponseWriter, r *http.Request) {
+	// Set the Content-Type header to JSON
+	w.Header().Set("Content-Type", "application/json")
+	// Parse query parameters from the request URL
+	queryValues := r.URL.Query()
+
+	activityId := queryValues.Get("id")
+
+	var activityHistoryID string
+
+	execQuery := models.DB.Raw(`
+			SELECT activity_history_id FROM apps_forwarded_accidents
+			WHERE activity_history_id = ? AND status = 'pending'
+			ORDER BY timestamps DESC
+			LIMIT 1
+		`, activityId).Scan(&activityHistoryID).Error
+
+	if execQuery != nil {
+		sentry.CaptureException(execQuery)
+		utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
+		return
+	}
+
+	if activityHistoryID == "" {
+		utils.SendErrorResponse(http.StatusNotFound, "Not yet forwarded", w)
+		return
+	} else {
+		var response []interface{}
+		utils.SendSuccessResponse(http.StatusOK, "Accident already forwarded", response, w)
+		return
+	}
+
+}
+
+func ForwardedAccidentsActions(w http.ResponseWriter, r *http.Request) {
+	// Set the Content-Type header to JSON
+	w.Header().Set("Content-Type", "application/json")
+	// Parse query parameters from the request URL
+	queryValues := r.URL.Query()
+
+	action := queryValues.Get("action")
+	activityId := queryValues.Get("activity_id")
+
+	execQuery := models.DB.Exec(`
+		UPDATE apps_activityhistory
+		SET status_report = ?
+		WHERE id = ?
+	`, action, activityId).Error
+
+	if execQuery != nil {
+		sentry.CaptureException(execQuery)
+		utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
+		return
+	}
+
+	if action == "rejected" {
+		execQuery := models.DB.Exec(`
+		DELETE FROM apps_forwarded_accidents WHERE activity_history_id = ?
+	`, activityId).Error
+
+		if execQuery != nil {
+			sentry.CaptureException(execQuery)
+			utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
+			return
+		}
+	}
+
+	var response []interface{}
+	utils.SendSuccessResponse(http.StatusOK, "", response, w)
+	return
+}

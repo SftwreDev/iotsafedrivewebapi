@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/getsentry/sentry-go"
 	"iotsafedriveapi/models"
-	"iotsafedriveapi/structs"
 	"iotsafedriveapi/utils"
 	"log"
 	"net/http"
@@ -24,6 +23,10 @@ func SignUpApi(w http.ResponseWriter, r *http.Request) {
 	address := r.FormValue("address")
 	contact := r.FormValue("contact")
 	deviceID := r.FormValue("device_id")
+	role := "user"
+
+	// Get timestamps today
+	dateJoined := time.Now()
 
 	// Hash the password securely
 	hashedPassword, err := utils.HashPassword(password)
@@ -58,51 +61,50 @@ func SignUpApi(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create a new user object with form values
-	newUser := &models.AppsUser{
-		FirstName:        firstName,
-		LastName:         lastName,
-		Email:            email,
-		Address:          address,
-		Contact:          contact,
-		DeviceID:         deviceID,
-		DateJoined:       time.Now(),
-		ProfilePicture:   secureURL,
-		Password:         hashedPassword,
-		IsActive:         true,
-		IsStaff:          true,
-		IsSuperuser:      false,
-		IsOnboardingDone: false,
-	}
+	err = models.DB.Exec(`
+		INSERT INTO apps_user(
+		                      email,
+		                      first_name,
+		                      last_name,
+		                      address,
+		                      contact,
+		                      role,
+		                      date_joined,
+		                      password,
+		                      username,
+		                      device_id,
+		                      profile_picture,
+		                      is_onboarding_done,
+		                      is_password_changed
+		)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true)
+	`,
+		email,
+		firstName,
+		lastName,
+		address,
+		contact,
+		role,
+		dateJoined,
+		hashedPassword,
+		"",
+		deviceID,
+		secureURL,
+		false,
+	).Error
 
-	// Save user data to the database
-	result := models.DB.Create(newUser)
-	if result.Error != nil {
-		sentry.CaptureException(result.Error)
+	if err != nil {
+		sentry.CaptureException(err)
 		// If there is an error, delete the uploaded profile picture from Cloudinary
 		deleteFile, _ := utils.DeleteFileFromCloudinary(publicID)
 		fmt.Println(deleteFile)
-
-		// Return an error response
-		utils.SendErrorResponse(http.StatusBadRequest, result.Error.Error(), w)
+		// Return an error response if token generation fails
+		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
 	}
 
-	// Convert the user object to response format
-	response := structs.AppsUser{
-		ID:               newUser.ID,
-		FirstName:        newUser.FirstName,
-		LastName:         newUser.LastName,
-		Address:          newUser.Address,
-		Contact:          newUser.Contact,
-		Email:            newUser.Email,
-		DeviceID:         newUser.DeviceID,
-		ProfilePicture:   newUser.ProfilePicture,
-		IsActive:         newUser.IsActive,
-		IsOnboardingDone: newUser.IsOnboardingDone,
-		IsStaff:          newUser.IsStaff,
-		IsSuperuser:      newUser.IsSuperuser,
-	}
-
-	// Create a success response with the user data
-	utils.SendSuccessResponse(http.StatusCreated, "Success", response, w)
+	// Return response message
+	var response []interface{}
+	utils.SendSuccessResponse(http.StatusCreated, "Successfully created your account", response, w)
+	return
 }

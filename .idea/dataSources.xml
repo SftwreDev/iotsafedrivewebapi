@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="iotsafedrive@railway" uuid="e3234cb4-5b72-49c7-a50d-aa439c2c9775">
-      <driver-ref>postgresql</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://roundhouse.proxy.rlwy.net:37487/railway</jdbc-url>
-      <working-dir>$ProjectFileDir$</working-dir>
-    </data-source>
     <data-source source="LOCAL" name="iotsafedrive@localhost" uuid="749c03ff-79f8-4553-8a46-c98e0a5f3b72">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>

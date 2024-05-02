@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/joho/godotenv"
 	"io"
 	"iotsafedriveapi/models"
 	"iotsafedriveapi/utils"
@@ -102,18 +101,18 @@ func createSuperUser() {
 
 }
 
-func init() {
-
-	fmt.Println("Server initializing...")
-
-	// Initialize env
-	err := godotenv.Load(".env")
-	if err != nil {
-		return
-	}
-
-	// Initialize models
-	models.ConnectDatabase()
-
-	createSuperUser()
-}
+//func init() {
+//
+//	fmt.Println("Server initializing...")
+//
+//	// Initialize env
+//	err := godotenv.Load(".env")
+//	if err != nil {
+//		return
+//	}
+//
+//	// Initialize models
+//	models.ConnectDatabase()
+//
+//	createSuperUser()
+//}

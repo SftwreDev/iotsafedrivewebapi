@@ -5,6 +5,7 @@ import (
 	"iotsafedriveapi/controllers/api"
 	"iotsafedriveapi/controllers/api/accident_alert"
 	"iotsafedriveapi/controllers/api/actor"
+	"iotsafedriveapi/controllers/api/analytics"
 	"iotsafedriveapi/controllers/api/auth"
 	"iotsafedriveapi/controllers/api/history"
 	"iotsafedriveapi/controllers/api/rescuers"
@@ -25,11 +26,13 @@ func InitializeRouter() {
 	router.HandleFunc("/api/token/obtain", auth.ObtainNewToken).Methods("POST")
 	router.Handle("/api/token/verify", middleware.ValidateToken(http.HandlerFunc(auth.VerifyTokenApi))).Methods("GET")
 	router.Handle("/api/update-password", middleware.ValidateToken(http.HandlerFunc(auth.UpdatePasswordApi))).Methods("POST")
+	router.Handle("/api/update-temporary-password", middleware.ValidateToken(http.HandlerFunc(auth.UpdateTemporaryPassword))).Methods("POST")
 
 	// Use the ValidateToken middleware for protected routes
 	router.Handle("/api/actors", middleware.ValidateToken(http.HandlerFunc(api.ActorGetListApi))).Methods("GET")
 	router.Handle("/api/actor/profile", middleware.ValidateToken(http.HandlerFunc(actor.GetActorProfileApi))).Methods("GET")
 	router.Handle("/api/actor/profile/update", middleware.ValidateToken(http.HandlerFunc(actor.UpdateActorProfileApi))).Methods("POST")
+	router.Handle("/api/actor/is-password-changed", middleware.ValidateToken(http.HandlerFunc(actor.IsPasswordChangedApi))).Methods("GET")
 
 	router.Handle("/api/rescuers", middleware.ValidateToken(http.HandlerFunc(rescuers.ListOfRescuersApi))).Methods("GET")
 	router.Handle("/api/rescuers/select", middleware.ValidateToken(http.HandlerFunc(rescuers.SelectRescuerApi))).Methods("POST")
@@ -51,14 +54,22 @@ func InitializeRouter() {
 	router.Handle("/api/activity-history/close", middleware.ValidateToken(http.HandlerFunc(history.CloseActivityHistoryApi))).Methods("DELETE")
 	router.Handle("/api/activity-history", middleware.ValidateToken(http.HandlerFunc(history.GetDetailedActivityHistoryApi))).Methods("GET")
 	router.Handle("/api/activity-history/latest", middleware.ValidateToken(http.HandlerFunc(history.GetLatestActivityHistoryApi))).Methods("GET")
+	router.Handle("/api/activity-history/forwarded", middleware.ValidateToken(http.HandlerFunc(history.GetForwardedAccidentsApi))).Methods("GET")
 
 	router.Handle("/api/users/all", middleware.ValidateToken(http.HandlerFunc(actor.GetAllUsersApi))).Methods("GET")
 
 	router.Handle("/api/accident-alert", middleware.ValidateToken(http.HandlerFunc(accident_alert.GetAllAccidentAlertApi))).Methods("GET")
+	router.Handle("/api/accident-alert/forward", middleware.ValidateToken(http.HandlerFunc(accident_alert.ForwardAccidentApi))).Methods("POST")
+	router.Handle("/api/accident-alert/status", middleware.ValidateToken(http.HandlerFunc(accident_alert.CheckIfAccidentIsForwarded))).Methods("GET")
+	router.Handle("/api/accident-alert/action", middleware.ValidateToken(http.HandlerFunc(accident_alert.ForwardedAccidentsActions))).Methods("POST")
 
 	router.Handle("/api/iot/alerts", http.HandlerFunc(accident_alert.AccidentDetectedApi)).Methods("POST")
 	router.Handle("/api/iot/alerts/check", middleware.ValidateToken(http.HandlerFunc(accident_alert.GetLatestAccidentAlertApi))).Methods("GET")
 	router.Handle("/api/send-sms", middleware.ValidateToken(http.HandlerFunc(accident_alert.SendSMSApi))).Methods("POST")
+
+	router.Handle("/api/add-account", http.HandlerFunc(actor.AddAccountApi)).Methods("POST")
+
+	router.Handle("/api/analytics/statistics", middleware.ValidateToken(http.HandlerFunc(analytics.DataAnalyticsApi))).Methods("POST")
 
 	// Inserting CORS middleware settings
 	handler := settings.CorsSettings(router)

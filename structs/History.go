@@ -12,3 +12,15 @@ type ActivityHistory struct {
 	StatusReport string    `json:"status_report"`
 	Owner        string    `json:"owner"`
 }
+
+type ForwardedAccidents struct {
+	ID                 string    `json:"id"`
+	Notes              string    `json:"notes"`
+	Status             string    `json:"status"`
+	ForwardedBy        string    `json:"forwarded_by"`
+	Location           string    `json:"location"`
+	Victim             string    `json:"victim"`
+	ActivityHistoryID  string    `json:"activity_history_id"`
+	ForwardedOn        time.Time `json:"forwarded_on"`
+	AccidentOccurredOn time.Time `json:"accident_occurred_on"`
+}

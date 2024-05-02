@@ -25,8 +25,7 @@ type SignInOutput struct {
 	FirstName        string `json:"first_name"`
 	LastName         string `json:"last_name"`
 	ProfilePicture   string `json:"profile_picture"`
-	IsStaff          bool   `json:"is_staff"`
-	IsSuperuser      bool   `json:"is_superuser"`
+	Role             string `json:"role"`
 	IsOnboardingDone bool   `json:"is_onboarding_done"`
 	AccessToken      string `json:"access_token"`
 	RefreshToken     string `json:"refresh_token"`
@@ -35,11 +34,9 @@ type SignInOutput struct {
 type UserClaims struct {
 	ID               uint   `json:"id"`
 	Email            string `json:"email"`
-	FirstName        string `json:"first"`
-	LastName         string `json:"last"`
-	IsActive         bool   `json:"is_active"`
-	IsStaff          bool   `json:"is_staff"`
-	IsSuperuser      bool   `json:"is_superuser"`
+	FirstName        string `json:"first_name"`
+	LastName         string `json:"last_name"`
+	Role             string `json:"role"`
 	IsOnboardingDone bool   `json:"is_onboarding_done"`
 	jwt.StandardClaims
 }
@@ -65,4 +62,9 @@ func (userClaims *UserClaims) SetUserClaimsPointer(email string, firstName strin
 	userClaims.Email = email
 	userClaims.FirstName = firstName
 	userClaims.LastName = lastName
+}
+
+type UpdateTempPassword struct {
+	CurrentPassword string `json:"current_password" validate:"required"`
+	NewPassword     string `json:"new_password" validate:"required"`
 }

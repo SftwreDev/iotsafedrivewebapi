@@ -46,10 +46,8 @@ func ActorGetListApi(w http.ResponseWriter, r *http.Request) {
 			Email:            user.Email,
 			DeviceID:         user.DeviceID,
 			ProfilePicture:   user.ProfilePicture,
-			IsActive:         user.IsActive,
 			IsOnboardingDone: user.IsOnboardingDone,
-			IsStaff:          user.IsStaff,
-			IsSuperuser:      user.IsSuperuser,
+			Role:             user.Role,
 		})
 	}
 

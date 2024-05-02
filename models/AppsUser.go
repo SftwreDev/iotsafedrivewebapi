@@ -14,13 +14,11 @@ type AppsUser struct {
 	Email          string    `json:"email"`
 	DeviceID       string    `json:"device_id"`
 	ProfilePicture string    `json:"profile_picture"`
+	Role           string    `json:"role"`
 	DateJoined     time.Time `json:"date_joined"`
 	Password       []byte    `json:"_"`
 
-	IsActive         bool `json:"is_active"`
 	IsOnboardingDone bool `json:"is_onboarding_done"`
-	IsStaff          bool `json:"is_staff"`
-	IsSuperuser      bool `json:"is_superuser"`
 }
 
 // TableName specifies the table name for the model.

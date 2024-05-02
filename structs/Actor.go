@@ -11,12 +11,10 @@ type Actor struct {
 	DeviceID       string `json:"device_id"`
 	ProfilePicture string `json:"profile_picture"`
 	DateJoined     string `json:"date_joined"`
+	Role           string `json:"role"`
 	Password       []byte `json:"_"`
 
-	IsActive         bool `json:"is_active"`
 	IsOnboardingDone bool `json:"is_onboarding_done"`
-	IsStaff          bool `json:"is_staff"`
-	IsSuperuser      bool `json:"is_superuser"`
 }
 
 type UpdateActor struct {
@@ -36,5 +34,12 @@ type AllUsers struct {
 	Contact    string `json:"contact"`
 	Email      string `json:"email"`
 	DeviceID   string `json:"device_id"`
+	Role       string `json:"role"`
 	DateJoined string `json:"date_joined"`
+}
+
+func (u *AllUsers) Modify() {
+	if u.Role == "super_admin" {
+		u.Role = "Super Admin"
+	}
 }

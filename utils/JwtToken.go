@@ -47,12 +47,22 @@ func ParseAccessToken(accessToken string) (*structs.UserClaims, error) {
 	return claims, nil
 }
 
-func ParseRefreshToken(refreshToken string) *jwt.StandardClaims {
-	parsedRefreshToken, _ := jwt.ParseWithClaims(refreshToken, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+func ParseRefreshToken(refreshToken string) (*jwt.StandardClaims, error) {
+	parsedRefreshToken, err := jwt.ParseWithClaims(refreshToken, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(os.Getenv("TOKEN_SECRET")), nil
 	})
 
-	return parsedRefreshToken.Claims.(*jwt.StandardClaims)
+	// Check if there's an error parsing the access token
+	if err != nil {
+		return nil, err
+	}
+
+	claims, ok := parsedRefreshToken.Claims.(*jwt.StandardClaims)
+	if !ok {
+		return nil, errors.New("failed to extract custom claims from refresh token")
+	}
+
+	return claims, nil
 }
 
 func GenerateAccessAndRefreshTokens(userClaims structs.UserClaims) (string, string, error) {

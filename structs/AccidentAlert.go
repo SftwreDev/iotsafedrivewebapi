@@ -29,3 +29,11 @@ type SendSMSStructs struct {
 	Lat          string `json:"lat"`
 	Lng          string `json:"lng"`
 }
+
+type ForwardAccident struct {
+	RescuerID         string `json:"rescuer_id"`
+	ActivityHistoryID string `json:"activity_history_id"`
+	Notes             string `json:"notes"`
+	Status            string `json:"status"`
+	ForwardedBy       string `json:"forwarded_by"`
+}

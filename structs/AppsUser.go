@@ -11,11 +11,9 @@ type AppsUser struct {
 	DeviceID       string `json:"device_id"`
 	ProfilePicture string `json:"profile_picture"`
 	DateJoined     string `json:"date_joined"`
+	Role           string `json:"role"`
 
-	IsActive         bool `json:"is_active"`
 	IsOnboardingDone bool `json:"is_onboarding_done"`
-	IsStaff          bool `json:"is_staff"`
-	IsSuperuser      bool `json:"is_superuser"`
 
 	Brand           string        `json:"brand"`
 	Model           string        `json:"model"`
