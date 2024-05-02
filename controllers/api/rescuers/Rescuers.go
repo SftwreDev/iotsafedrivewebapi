@@ -16,11 +16,12 @@ func ListOfRescuersApi(w http.ResponseWriter, r *http.Request) {
 	err := models.DB.Raw(`
 		SELECT
 		    id, 
-			name,
+			CONCAT(first_name, ' ', last_name) as name,
 			address,
 			contact
 		FROM
-			apps_rescueteamcontacts
+			apps_user
+		WHERE role = 'rescuer'
 	`).Scan(&rescuers).Error
 
 	if err != nil {
