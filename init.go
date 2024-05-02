@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/joho/godotenv"
 	"io"
 	"iotsafedriveapi/models"
 	"iotsafedriveapi/utils"
@@ -79,17 +80,14 @@ func createSuperUser() {
 						  last_name, 
 						  email, 
 						  password, 
-						  is_superuser, 
-						  is_staff, 
 						  is_onboarding_done, 
 						  device_id, 
-						  is_active, 
 						  date_joined, 
 						  profile_picture)
 			VALUES 
-				(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-			`, superuser.FirstName, superuser.LastName, superuser.Email, hashedPassword, "true", "false",
-				"true", superuser.DeviceID, "true", time.Now(), superuser.ProfilePicture).Error
+				(?, ?, ?, ?, ?, ?, ?, ?)
+			`, superuser.FirstName, superuser.LastName, superuser.Email, hashedPassword,
+				"true", superuser.DeviceID, time.Now(), superuser.ProfilePicture).Error
 
 			if result != nil {
 				fmt.Printf("Error creating account : %s \n", result)
@@ -101,18 +99,18 @@ func createSuperUser() {
 
 }
 
-//func init() {
-//
-//	fmt.Println("Server initializing...")
-//
-//	// Initialize env
-//	err := godotenv.Load(".env")
-//	if err != nil {
-//		return
-//	}
-//
-//	// Initialize models
-//	models.ConnectDatabase()
-//
-//	createSuperUser()
-//}
+func init() {
+
+	fmt.Println("Server initializing...")
+
+	// Initialize env
+	err := godotenv.Load(".env")
+	if err != nil {
+		return
+	}
+
+	// Initialize models
+	models.ConnectDatabase()
+
+	createSuperUser()
+}
