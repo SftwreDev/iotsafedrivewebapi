@@ -1,5 +1,7 @@
 package structs
 
+import "time"
+
 type AccidentAlert struct {
 	Latitude  string `json:"latitude"`
 	Longitude string `json:"longitude"`
@@ -36,4 +38,28 @@ type ForwardAccident struct {
 	Notes             string `json:"notes"`
 	Status            string `json:"status"`
 	ForwardedBy       string `json:"forwarded_by"`
+}
+
+type RejectedNotifications struct {
+	Reason string `json:"reason"`
+}
+
+type AcceptedAccidents struct {
+	ID         int       `json:"id"`
+	Notes      string    `json:"notes"`
+	Status     string    `json:"status"`
+	AcceptedBy string    `json:"accepted_by"`
+	Rescuer    string    `json:"rescuer"`
+	Patient    string    `json:"patient"`
+	Timestamps time.Time `json:"timestamps"`
+}
+
+type RejectedAccidents struct {
+	ID         int       `json:"id"`
+	Notes      string    `json:"notes"`
+	Status     string    `json:"status"`
+	RejectedBy string    `json:"rejected_by"`
+	Rescuer    string    `json:"rescuer"`
+	Patient    string    `json:"patient"`
+	Timestamps time.Time `json:"timestamps"`
 }

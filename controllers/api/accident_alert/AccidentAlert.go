@@ -10,6 +10,7 @@ import (
 	"iotsafedriveapi/structs"
 	"iotsafedriveapi/utils"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -350,6 +351,7 @@ func SendSMSApi(w http.ResponseWriter, r *http.Request) {
 }
 
 func ForwardAccidentApi(w http.ResponseWriter, r *http.Request) {
+
 	// Set the Content-Type header to JSON
 	w.Header().Set("Content-Type", "application/json")
 
@@ -390,6 +392,8 @@ func ForwardAccidentApi(w http.ResponseWriter, r *http.Request) {
 		utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
 		return
 	}
+
+	go utils.PerformPendingAccidents(payload.ActivityHistoryID)
 
 	var response []interface{}
 	utils.SendSuccessResponse(http.StatusOK, "Successfully forwarded accident", response, w)
@@ -433,28 +437,89 @@ func CheckIfAccidentIsForwarded(w http.ResponseWriter, r *http.Request) {
 func ForwardedAccidentsActions(w http.ResponseWriter, r *http.Request) {
 	// Set the Content-Type header to JSON
 	w.Header().Set("Content-Type", "application/json")
+
+	// Get userClaims data from request context
+	userClaims, ok := utils.GetUserClaimsContext(r)
+	if !ok {
+		message := "User not found "
+		// Return a not found error response
+		utils.SendErrorResponse(http.StatusNotFound, message, w)
+		return
+	}
+
+	// Declare userEmail from userClaims
+	rescuer := fmt.Sprintf(`%s %s`, userClaims.FirstName, userClaims.LastName)
+	userID := userClaims.ID
+
 	// Parse query parameters from the request URL
 	queryValues := r.URL.Query()
 
 	action := queryValues.Get("action")
 	activityId := queryValues.Get("activity_id")
 
-	execQuery := models.DB.Exec(`
-		UPDATE apps_activityhistory
-		SET status_report = ?
-		WHERE id = ?
-	`, action, activityId).Error
+	// Read and parse request body into SignInInput struct
+	var payload structs.RejectedNotifications
+	body, _ := io.ReadAll(r.Body)
+	_ = json.Unmarshal(body, &payload)
 
-	if execQuery != nil {
-		sentry.CaptureException(execQuery)
-		utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
+	// Validate input using validator package
+	validate := validator.New()
+	err := validate.Struct(payload)
+	if err != nil {
+		sentry.CaptureException(err)
+		// Return a validation error response
+		utils.SendErrorResponse(http.StatusBadRequest, err.Error(), w)
 		return
 	}
 
 	if action == "rejected" {
 		execQuery := models.DB.Exec(`
-		DELETE FROM apps_forwarded_accidents WHERE activity_history_id = ?
-	`, activityId).Error
+			DELETE FROM apps_forwarded_accidents WHERE activity_history_id = ?
+		`, activityId).Error
+
+		if execQuery != nil {
+			sentry.CaptureException(execQuery)
+			utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
+			return
+		}
+
+		execQuery = models.DB.Exec(`
+			INSERT INTO apps_rejected_accidents(rescuer_id, activity_history_id, notes, status, rejected_by) 
+			VALUES (?, ?, ?, ?, ?)`, strconv.Itoa(int(userID)), activityId, payload.Reason, "rejected", rescuer).Error
+
+		if execQuery != nil {
+			sentry.CaptureException(execQuery)
+			utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
+			return
+		}
+
+		execQuery = models.DB.Exec(`
+			UPDATE apps_activityhistory
+			SET status_report = ?
+			WHERE id = ?
+		`, action, activityId).Error
+
+		if execQuery != nil {
+			sentry.CaptureException(execQuery)
+			utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
+			return
+		}
+	} else {
+		execQuery := models.DB.Exec(`
+			INSERT INTO apps_accepted_accidents(rescuer_id, activity_history_id, notes, status, accepted_by) 
+			VALUES (?, ?, ?, ?, ?)`, strconv.Itoa(int(userID)), activityId, payload.Reason, "accepted", rescuer).Error
+
+		if execQuery != nil {
+			sentry.CaptureException(execQuery)
+			utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
+			return
+		}
+
+		execQuery = models.DB.Exec(`
+			UPDATE apps_activityhistory
+			SET status_report = ?
+			WHERE id = ?
+		`, action, activityId).Error
 
 		if execQuery != nil {
 			sentry.CaptureException(execQuery)
@@ -465,5 +530,144 @@ func ForwardedAccidentsActions(w http.ResponseWriter, r *http.Request) {
 
 	var response []interface{}
 	utils.SendSuccessResponse(http.StatusOK, "", response, w)
+	return
+}
+
+func AcceptedAccidents(w http.ResponseWriter, r *http.Request) {
+	// Set the Content-Type header to JSON
+	w.Header().Set("Content-Type", "application/json")
+
+	// Get userClaims data from request context
+	userClaims, ok := utils.GetUserClaimsContext(r)
+	if !ok {
+		message := "User not found "
+		// Return a not found error response
+		utils.SendErrorResponse(http.StatusNotFound, message, w)
+		return
+	}
+
+	userID := userClaims.ID
+
+	var role string
+
+	execQuery := models.DB.Raw(`SELECT role FROM apps_user WHERE id = ?`, userID).Scan(&role).Error
+	if execQuery != nil {
+		sentry.CaptureException(execQuery)
+		utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
+		return
+	}
+	var acceptedAccidents []structs.AcceptedAccidents
+
+	var sqlQuery string
+
+	baseQuery := `
+		SELECT
+			ac.id,
+			ac.notes,
+			ac.status,
+			ac.accepted_by,
+			ac.timestamps,
+			CONCAT(u.first_name, ' ', u.last_name) AS rescuer,
+			CONCAT(us.first_name, ' ', us.last_name) AS patient
+		FROM
+			apps_accepted_accidents AS ac
+				INNER JOIN
+			apps_user AS u ON u.id = ac.rescuer_id
+				INNER JOIN
+			apps_activityhistory AS ah ON ah.id = ac.activity_history_id
+				INNER JOIN
+			apps_user AS us ON us.id = ah.user_id
+	`
+
+	whereClause := fmt.Sprintf("WHERE ac.rescuer_id = %d", userID)
+	orderByClause := ` ORDER BY ac.timestamps DESC`
+
+	switch role {
+	case "rescuer":
+		sqlQuery = baseQuery + whereClause + orderByClause
+
+	default:
+		sqlQuery = baseQuery + orderByClause
+	}
+
+	execQuery = models.DB.Raw(sqlQuery).Scan(&acceptedAccidents).Error
+
+	if execQuery != nil {
+		sentry.CaptureException(execQuery)
+		utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
+		return
+	}
+
+	utils.SendSuccessResponse(http.StatusOK, "", acceptedAccidents, w)
+	return
+}
+
+func RejectedAccidents(w http.ResponseWriter, r *http.Request) {
+	// Set the Content-Type header to JSON
+	w.Header().Set("Content-Type", "application/json")
+
+	// Get userClaims data from request context
+	userClaims, ok := utils.GetUserClaimsContext(r)
+	if !ok {
+		message := "User not found "
+		// Return a not found error response
+		utils.SendErrorResponse(http.StatusNotFound, message, w)
+		return
+	}
+
+	userID := userClaims.ID
+
+	var role string
+
+	execQuery := models.DB.Raw(`SELECT role FROM apps_user WHERE id = ?`, userID).Scan(&role).Error
+	if execQuery != nil {
+		sentry.CaptureException(execQuery)
+		utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
+		return
+	}
+
+	var rejectedAccidents []structs.RejectedAccidents
+
+	var sqlQuery string
+
+	baseQuery := `
+		SELECT
+			rj.id,
+			rj.notes,
+			rj.status,
+			rj.rejected_by,
+			rj.timestamps,
+			CONCAT(u.first_name, ' ', u.last_name) AS rescuer,
+			CONCAT(us.first_name, ' ', us.last_name) AS patient
+		FROM
+			apps_rejected_accidents AS rj
+				INNER JOIN
+			apps_user AS u ON u.id = rj.rescuer_id
+				INNER JOIN
+			apps_activityhistory AS ah ON ah.id = rj.activity_history_id
+				INNER JOIN
+			apps_user AS us ON us.id = ah.user_id
+	`
+
+	whereClause := fmt.Sprintf("WHERE rj.rescuer_id = %d", userID)
+	orderByClause := ` ORDER BY rj.timestamps DESC`
+
+	switch role {
+	case "rescuer":
+		sqlQuery = baseQuery + whereClause + orderByClause
+
+	default:
+		sqlQuery = baseQuery + orderByClause
+	}
+
+	execQuery = models.DB.Raw(sqlQuery).Scan(&rejectedAccidents).Error
+
+	if execQuery != nil {
+		sentry.CaptureException(execQuery)
+		utils.SendErrorResponse(http.StatusBadRequest, execQuery.Error(), w)
+		return
+	}
+
+	utils.SendSuccessResponse(http.StatusOK, "", rejectedAccidents, w)
 	return
 }

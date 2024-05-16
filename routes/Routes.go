@@ -62,6 +62,8 @@ func InitializeRouter() {
 	router.Handle("/api/accident-alert/forward", middleware.ValidateToken(http.HandlerFunc(accident_alert.ForwardAccidentApi))).Methods("POST")
 	router.Handle("/api/accident-alert/status", middleware.ValidateToken(http.HandlerFunc(accident_alert.CheckIfAccidentIsForwarded))).Methods("GET")
 	router.Handle("/api/accident-alert/action", middleware.ValidateToken(http.HandlerFunc(accident_alert.ForwardedAccidentsActions))).Methods("POST")
+	router.Handle("/api/accident-alert/accepted", middleware.ValidateToken(http.HandlerFunc(accident_alert.AcceptedAccidents))).Methods("GET")
+	router.Handle("/api/accident-alert/rejected", middleware.ValidateToken(http.HandlerFunc(accident_alert.RejectedAccidents))).Methods("GET")
 
 	router.Handle("/api/iot/alerts", http.HandlerFunc(accident_alert.AccidentDetectedApi)).Methods("POST")
 	router.Handle("/api/iot/alerts/check", middleware.ValidateToken(http.HandlerFunc(accident_alert.GetLatestAccidentAlertApi))).Methods("GET")
