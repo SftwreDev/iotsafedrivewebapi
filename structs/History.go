@@ -4,7 +4,7 @@ import "time"
 
 type ActivityHistory struct {
 	ID           string    `json:"id"`
-	TimeStamps   time.Time `json:"time_stamps"`
+	Timestamps   time.Time `json:"timestamps"`
 	Location     string    `json:"location"`
 	Latitude     string    `json:"latitude"`
 	Longitude    string    `json:"longitude"`
