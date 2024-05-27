@@ -11,6 +11,7 @@ type ActivityHistory struct {
 	Status       string    `json:"status"`
 	StatusReport string    `json:"status_report"`
 	Owner        string    `json:"owner"`
+	DeviceID     string    `json:"device_id"`
 }
 
 type ForwardedAccidents struct {

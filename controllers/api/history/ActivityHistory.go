@@ -17,7 +17,7 @@ func GetAllActivityHistoryApi(w http.ResponseWriter, r *http.Request) {
 		`
 				SELECT
 					h.id, h.timestamps, h.location, h.latitude, h.longitude, h.status, h.status_report,
-					CONCAT(u.first_name, ' ', u.last_name) AS owner
+					CONCAT(u.first_name, ' ', u.last_name) AS owner, u.device_id
 				FROM apps_activityhistory as h
 				INNER JOIN apps_user as u ON u.id = h.user_id;
 			`,
@@ -71,7 +71,7 @@ func GetDetailedActivityHistoryApi(w http.ResponseWriter, r *http.Request) {
 		`
 				SELECT
 					h.id, h.timestamps, h.location, h.latitude, h.longitude, h.status, h.status_report,
-					CONCAT(u.first_name, ' ', u.last_name) AS owner
+					CONCAT(u.first_name, ' ', u.last_name) AS owner, u.device_id
 				FROM apps_activityhistory as h
 				INNER JOIN apps_user as u ON u.id = h.user_id
 				WHERE h.id = ?
@@ -120,7 +120,7 @@ func GetLatestActivityHistoryApi(w http.ResponseWriter, r *http.Request) {
 		`
 				SELECT
 					h.id, h.timestamps, h.location, h.latitude, h.longitude, h.status, h.status_report,
-					CONCAT(u.first_name, ' ', u.last_name) AS owner
+					CONCAT(u.first_name, ' ', u.last_name) AS owner, u.device_id
 				FROM apps_activityhistory as h
 						 INNER JOIN apps_user as u ON u.id = h.user_id
 				WHERE status_report = 'pending' AND status = 'SMS Sent'
