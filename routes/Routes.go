@@ -53,6 +53,7 @@ func InitializeRouter() {
 	router.Handle("/api/activity-history/pending", middleware.ValidateToken(http.HandlerFunc(history.GetPendingActivityHistoryApi))).Methods("GET")
 	router.Handle("/api/activity-history/close", middleware.ValidateToken(http.HandlerFunc(history.CloseActivityHistoryApi))).Methods("DELETE")
 	router.Handle("/api/activity-history", middleware.ValidateToken(http.HandlerFunc(history.GetDetailedActivityHistoryApi))).Methods("GET")
+	router.Handle("/api/activity-history/details/narrative-report", middleware.ValidateToken(http.HandlerFunc(history.GetSpecificActivityHistoryForNarrativeReportApi))).Methods("GET")
 	router.Handle("/api/activity-history/latest", middleware.ValidateToken(http.HandlerFunc(history.GetLatestActivityHistoryApi))).Methods("GET")
 	router.Handle("/api/activity-history/forwarded", middleware.ValidateToken(http.HandlerFunc(history.GetForwardedAccidentsApi))).Methods("GET")
 
@@ -72,6 +73,8 @@ func InitializeRouter() {
 	router.Handle("/api/add-account", http.HandlerFunc(actor.AddAccountApi)).Methods("POST")
 
 	router.Handle("/api/analytics/statistics", middleware.ValidateToken(http.HandlerFunc(analytics.DataAnalyticsApi))).Methods("POST")
+
+	router.Handle("/api/narrative-report/create", middleware.ValidateToken(http.HandlerFunc(history.CreateNarrativeReportApi))).Methods("POST")
 
 	// Inserting CORS middleware settings
 	handler := settings.CorsSettings(router)

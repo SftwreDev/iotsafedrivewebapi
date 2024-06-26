@@ -25,3 +25,21 @@ type ForwardedAccidents struct {
 	ForwardedOn        time.Time `json:"forwarded_on"`
 	AccidentOccurredOn time.Time `json:"accident_occurred_on"`
 }
+
+type AccidentDetails struct {
+	ID           string    `json:"id"`
+	Timestamps   time.Time `json:"timestamps"`
+	Location     string    `json:"location"`
+	Latitude     string    `json:"latitude"`
+	Longitude    string    `json:"longitude"`
+	Status       string    `json:"status"`
+	StatusReport string    `json:"status_report"`
+	Owner        string    `json:"owner"`
+	DeviceID     string    `json:"device_id"`
+	Rescuer      string    `json:"rescuer"`
+}
+
+type CreateNarrativeReport struct {
+	ActivityHistoryID string `json:"activity_history_id"`
+	Description       string `json:"description"`
+}

@@ -5,11 +5,12 @@ import (
 	"github.com/joho/godotenv"
 	"iotsafedriveapi/models"
 	"iotsafedriveapi/routes"
+	"log"
 )
 
 func main() {
 
-	fmt.Println("Starting server...")
+	log.Println("Starting webserver...")
 	// Initialize env
 	err := godotenv.Load(".env")
 	if err != nil {
